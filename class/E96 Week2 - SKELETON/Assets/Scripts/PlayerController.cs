@@ -10,11 +10,12 @@ using UnityEngine.SceneManagement;
 public class PlayerController : MonoBehaviour
 {
     Rigidbody rb;
-    // SphereCollider box;
+    
     [SerializeField] float speed = 5f;
     [SerializeField] float jumpHeight = 5f;
     Vector2 moveValue = Vector2.zero;
     bool pancake = false;
+    bool isGrounded = true;
     // TODO: add component references
 
     // TODO: add variables for speed, jumpHeight, and respawnHeight
@@ -25,7 +26,7 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {   
-        // box = GetComponent<BoxCollider>();
+        
         rb = GetComponent<Rigidbody>();
         // TODO: Get references to the components attached to the current GameObject
 
@@ -47,22 +48,19 @@ public class PlayerController : MonoBehaviour
     private void Pancake()
     {
         if (!pancake) {
-            // Vector3 curPos = transform.position;
+            
             Vector3 curScale = transform.localScale;
-            // float movY = curScale.y / 2;
-            // Vector3 newBox = new Vector3(box.size.x, box.size.y - movY, box.size.z);
             Vector3 newScale = new Vector3(curScale.x * 2f, curScale.y * 0.5f, curScale.z * 2f);
-            // Vector3 newPos = new Vector3(curPos.x, curPos.y - movY, curPos.z);
             transform.localScale = newScale;
-            // box.size = newBox;
-            //transform.position = newPos;
             pancake = true;
         }
     }
 
     void OnJump()
     {
-        Jump();
+        if (isGrounded) {
+            Jump();
+        }
 
     }
     private void Jump()
@@ -90,18 +88,29 @@ public class PlayerController : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
+        if (collision.gameObject.CompareTag("Ground"))
+            isGrounded = true;
         // This function is commonly useful, but for our current implementation we don't need it
 
     }
 
     void OnCollisionStay(Collision collision)
     {
+
+       // if (collision.gameObject.CompareTag("Ground"))
+       //     isGrounded = true;
+        Vector3 norm = collision.GetContact(0).normal;
+        if (Vector3.Angle(norm,Vector3.up) < 45)
+            isGrounded = true;
+
         // TODO: Check if we are in contact with the ground. If we are, note that we are grounded
 
     }
 
     void OnCollisionExit(Collision collision)
     {
+        if (collision.gameObject.CompareTag("Ground"))
+            isGrounded = false;
         // TODO: When we leave the ground, we are no longer grounded
 
     }
